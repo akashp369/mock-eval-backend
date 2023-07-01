@@ -13,6 +13,8 @@ const { UserModel } = require('./user.model');
 
 const app= express();
 app.use(express.json())
+
+// this is cors it is very important when u connecting frontend with backend using locahost port 
 app.use(cors());
 
 
