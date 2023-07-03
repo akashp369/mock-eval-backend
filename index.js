@@ -6,8 +6,10 @@ const bodyParser = require('body-parser');
 const cors=require('cors')
 
 
-const { connection } = require('./db');
-const { UserModel } = require('./user.model');
+const { connection } = require('./config/db');
+const { UserModel } = require('./model/user.model');
+const { authmiddleware } = require('./middleware/authmiddleware');
+const { EmployeeRoute } = require('./route/employee');
 
 
 
@@ -17,9 +19,7 @@ app.use(express.json())
 // this is cors it is very important when u connecting frontend with backend using locahost port 
 app.use(cors());
 
-
-
-app.post('/users', (req, res)=>{
+app.post('/signup', (req, res)=>{
     const {fullName, email, password}=req.body;
     bcrypt.hash(password, 5, async(err,hash)=>{
         if(err) res.send('something went worong by bcrpt')
@@ -30,6 +30,31 @@ app.post('/users', (req, res)=>{
         res.send({msg:"signup successfully", u})
     })   
 })
+
+app.post('/login', async(req, res)=>{
+    const {email, password}=req.body
+    console.log(email, password)
+    const user=await UserModel.findOne({email})
+    if(!user){
+        return res.send("first signup")
+    }
+    const hash= user.password
+    bcrypt.compare(password, hash, function(err, result) {
+        if(err){
+            res.send('this is from login error')
+        }
+        if(result){
+            var token = jwt.sign({ userID : user._id }, process.env.MYSECRET);
+            res.json({"msg":"login success", "token": token})
+        }else{
+            res.json("login failed")
+        }
+    })
+    
+})
+
+
+app.use('/employees', authmiddleware, EmployeeRoute);
 
 
 app.listen(process.env.PORT, async()=>{
