@@ -15,6 +15,14 @@ userDataRoute.get("/", async (req, res) => {
     }
   });
 
+userDataRoute.get('/all', async(req,res)=>{
+    try {
+        const user = await UserModel.find()
+        res.send(user)
+    } catch (error) {
+        res.send("something went wronng")
+    }
+})
 userDataRoute.get("/friends", async (req, res) => {
     try {
         const { userID } = req.body;
@@ -36,11 +44,12 @@ userDataRoute.get("/friends", async (req, res) => {
   });
 
 /* UPDATE */
-userDataRoute.patch("/:friendId", async (req, res) => {
+userDataRoute.post(`/friend/:friendId`, async (req, res) => {
     try {
         const { userID } = req.body;
         const id= userID
         const { friendId } = req.params;
+        console.log(id, friendId)
         const user = await UserModel.findById(id);
         const friend = await UserModel.findById(friendId);
   
